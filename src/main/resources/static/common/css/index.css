@@ -1,0 +1,29 @@
+.global-search{
+    padding-left: 15px;
+    width: 400px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px silver;
+    margin-top: 13px;
+    color: #0f0f0f;
+}
+.global-button{
+    text-align: center;
+    width: 80px;
+    height: 34px;
+    border: 1px silver;
+    border-radius: 6px;
+    border-color: blue;
+    background-color: coral;
+    margin-left: 1px;
+}
+.global-button:hover{
+    text-align: center;
+    width: 80px;
+    height: 34px;
+    border: 1px silver;
+    border-radius: 6px;
+    border-color: blue;
+    background-color: #ffe8ad;
+    margin-left: 1px;
+}

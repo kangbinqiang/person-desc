@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.css"/>
+    <link rel="stylesheet" href="/common/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/common/css/index.css"/>
+
+    <script src="/common/js/jquery-1.11.3.min.js"></script>
+    <script src="/common/js/bootstrap.js"></script>
+    <script src="/layui/layui.all.js"></script>
+    <script src="/layui/layer-v3.1.1/layer/layer.js"></script>
+    <!-- / table-->
+    <script src="/common/js/bootstrap-table/bootstrap-table-min.js"></script>
+    <link rel="stylesheet" href="/common/css/bootstrap-table/bootstrap-table.css" type="text/css"/>
+    <script src="/common/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+</head>
+<body>
+<div class="layui-row">
+    <div class="layui-col-md2">
+        此处展示所在那个部门
+    </div>
+    <div class="layui-col-md10">
+        <button  id="btn_search"  class="layui-btn layui-btn-radius">查询</button>
+        <button  id="btn_adduser"  class="layui-btn layui-btn-radius">新增</button>
+        <hr class="layui-bg-green">
+        <div id="toolbar"></div>
+        <table id="userTable"></table>
+    </div>
+</div>
+
+</body>
+<script src="/common/js/path.js"></script>
+<script type="text/javascript">
+    $(function () {
+        //1.初始化Table
+        var oTable = new TableInit();
+        oTable.Init();//2.关联查询按钮
+        $("#btn_search").click(function(){
+            $("#userTable").bootstrapTable("selectPage", 1).bootstrapTable("refresh");
+        });
+
+    });
+    var TableInit = function () {
+        var oTableInit = new Object();
+        //初始化Table
+        oTableInit.Init = function () {
+            var table = $("#userTable");
+            table.bootstrapTable({
+                url: "/Sysuser/getAllList",//请求数据url
+                method:'GET',
+                toolbar: '#toolbar',
+                cache: false,
+                striped:true,
+                showHeader: true,
+                showColumns: true, //显示下拉框勾选要显示的列
+                pagination: true,//分页
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParams: oTableInit.queryParams,//传递参数（*）
+                sidePagination: 'server',//服务器端分页
+                pageNumber: 1,
+                pageSize: 5,
+                pageList: [5, 10, 20, 50,'all'],//分页步进值
+                search: true,//显示搜索框
+                minimumCountColunms:4,//最小显示列
+                showRefresh:true,//显示刷新按钮
+                showToggle:true,//是否显示详细视图和列表是视图的按钮
+                cardView:false,//是否显示详细视图
+                datailView:true,//是否显示父子表
+                uniqueID: 'id',
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                columns: [  //表格的列
+                    {
+                        align: 'center',
+                        field: 'id',//域值
+                        title: 'id',//标题
+                        visible: true,//false表示不显示
+                        sortable: false,//启用排序
+                        width: '5%',
+                        formatter:function (value,row,index) {
+                            var pageSize = $("#userTable").bootstrapTable('getOptions').pageSize;//获取页面的大小
+                            var pageNumber = $("#userTable").bootstrapTable('getOptions').pageNumber;//获取页面的页码
+                            return pageSize * (pageNumber - 1) + index + 1;//返回序号
+                        }
+                    },
+                    {
+                        align: 'center',
+                        field: 'userId',//域值
+                        title: '用户id',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'username',//域值
+                        title: '用户名',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'sex',//域值
+                        title: '性别',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                        formatter: checkSexImage,
+                    },
+                    {
+                        align: 'center',
+                        field: 'age',//域值
+                        title: '年龄',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'status',//域值
+                        title: '状态',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'createTime',//域值
+                        title: '创建时间',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                        formatter: DateConvertString,
+                    },
+                    {
+                        align: 'center',
+                        field: 'updateTime',//域值
+                        title: '更改时间',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                        formatter: DateConvertString,
+                    },
+                    {
+                        align: 'center',
+                        field: 'lastLoginTime',//域值
+                        title: '最后登录时间',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                        formatter : DateConvertString,
+                    },
+                    {
+                        align: 'center',
+                        field: 'operate',//域值
+                        title: '操作',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '35%',
+                        formatter: operateFormatter
+                    }]
+            })};
+        oTableInit.queryParams = function (params) {
+            var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                order: params.order,    //排序方式
+                sortName: params.sort
+            };
+            return temp;
+        };
+        return oTableInit;
+    };
+    function checkSexImage(value,row,index){
+        if(value != null){
+            if(value ==1){
+                return '<img src="/common/image/male.png" style="width: 20px;height: 20px;"/>'
+            }else{
+                return '<img src="/common/image/female.png" style="width: 20px;height: 20px;"/>'
+            }
+        }
+    }
+    function DateConvertString (value,row,index) {
+        //日期时间戳转换
+        if (value == null){
+            return null;
+        }else{
+            var time = new Date(value);
+            var y = time.getFullYear();//年
+            var m = time.getMonth() + 1;//月
+            var d = time.getDate();//日
+            var mm  = time.getHours();//小时
+            var s = time.getMinutes();//分钟
+            return y+"-"+m+"-"+d;
+        }
+    }
+    function operateFormatter(value,row,index) {
+        return[
+            '<button id="btn_edit" class="layui-btn layui-btn-sm">编辑</button>'+
+            '<button id="btn_delete" class="layui-btn layui-btn-sm layui-btn-danger">删除</button>'+
+            '<button id="btn_disbute" class="layui-btn layui-btn-sm">分配角色</button>'+
+            '<button id="btn_restore" class="layui-btn layui-btn-sm layui-btn-danger">重置密码</button>'
+        ].join('');
+    }
+    window.operateEvents = {
+        "click #btn_edit":function (e,value,row,index) {
+            $("#addUser").modal();
+        },
+        "click #btn_delete":function (e,value,row,index) {
+        },
+        "click #btn_disbute":function (e,value,row,index) {
+        },
+        "click #btn_restore":function (e,value,row,index) {
+        }
+    }
+    $("#btn_adduser").click(function () {
+        layer.open({
+            type: 2,
+            area: ['700px', '450px'],
+            fixed: false, //不固定
+            maxmin: true,
+            content: 'adduser'
+        });
+    })
+</script>
+</html>

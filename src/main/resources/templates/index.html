@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>个人信息网站</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.css"/>
+    <link rel="stylesheet" href="/common/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/common/css/index.css"/>
+
+    <script src="/common/js/jquery-1.11.3.min.js"></script>
+    <script src="/common/js/bootstrap.js"></script>
+    <script src="/layui/layui.all.js"></script>
+    <style type="text/css">
+        .x-iframe{
+            width: 100%;
+            height: 100%;
+        }
+        .layui-tab-item{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-bg-black layui-header">
+        <div class="layui-logo">Personal System</div>
+        <ul class="layui-nav layui-layout-left" style="padding: 0px">
+            <input id="globalIn" class="global-search">
+            <button id="globalBtn" class="global-button">搜索</button>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="">控制台<span class="layui-badge">9</span></a>
+            </li>
+            <li class="layui-nav-item">
+                <a href="">个人中心<span class="layui-badge-dot"></span></a>
+            </li>
+            <li class="layui-nav-item" lay-unselect="">
+                <a href="javascript:;"><img src="//t.cn/RCzsdCq" class="layui-nav-img">我</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:;">修改信息</a></dd>
+                    <dd><a href="javascript:;">安全管理</a></dd>
+                    <dd><a href="javascript:;">退了</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul id="sysMenu" class="layui-nav layui-nav-tree"  lay-filter="test">
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-tab tab" lay-filter="mainTab" lay-allowclose="false" style="height: 100%;">
+            <ul class="layui-tab-title">
+                <li class="home"><i class="layui-icon">&#xe68e;</i>我的桌面</li>
+            </ul>
+            <div class="layui-tab-content" style="height: 100%;">
+                <div class="layui-tab-item layui-show" style="height: 100%;">
+                    <iframe src='http://localhost:8088/MainInfo/main' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © Personal System - 底部固定区域
+    </div>
+</div>
+</body>
+</html>
+<script src="/common/js/path.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+        layui.jquery.ajax({
+            url: '/MainInfo/getMenuInfo',
+            data: {},
+            dataType: 'json',
+            type: "GET",
+            success: function (data) {
+                //初始化菜单信息
+                initMenu(data);
+                element.init();
+                $("#sysMenu li dl dd").click(function(event){
+                    var url = $(this).children('a').attr('menu-url');
+                    var title = $(this).find('cite').html();
+                    var index  = $(this).children('a').attr('menu-id');
+                    //遍历打开的窗口，如果当前点击的选项已经打开，则跳转到对应窗口去，不再执行for外面的两条语句，创建新窗口
+                    for (var i = 0; i <$('.x-iframe').length; i++) {
+                        if($('.x-iframe').eq(i).attr('tab-id')==index){
+                            tab.tabChange(index);
+                            event.stopPropagation();
+                            return;
+                        }
+                    };
+                    tab.tabAdd(title,url,index);
+                    tab.tabChange(index);
+                });
+            },
+            error: function (data) {
+                alert("failed");
+            }
+        });
+        function initMenu(data){
+            var ul = $("#sysMenu");
+            for(var i=0;i<data.length;i++){
+                if(data[i].childMenu != null){
+                    var onelevel = $('<li class="layui-nav-item"><a style="text-decoration: none"><i class="'+data[i].icon+'"/><cite style="margin-left: 20px">'+data[i].menuName+'</cite></a></li>');
+                    ul.append(onelevel);
+                    var twolevel = $('<dl class="layui-nav-child"></dl>');
+                    onelevel.append(twolevel);
+                    for(var j=0;j<data[i].childMenu.length;j++){
+                        twolevel.append('<dd><a style="text-decoration: none" menu-id="'+data[i].childMenu[j].menuId+'" menu-url="'+localhostPath+data[i].childMenu[j].url+'"><i class="'+data[i].childMenu[j].icon+'"/><cite style="margin-left: 20px">'+data[i].childMenu[j].menuName+'</cite></a></dd>');
+                    }
+                }else{
+                    ul.append('<li class="layui-nav-item"><a style="text-decoration: none"><i class="'+data[i].icon+'"/><cite style="margin-left: 20px">'+data[i].menuName+'</cite></a></li>');
+                }
+
+            }
+        }
+
+        //点击新增子页面
+        var tab = {
+            tabAdd:function(title,url,id){
+                element.tabAdd('mainTab',{
+                    title: title,//用于演示
+                    content: '<iframe tab-id="'+id+'" frameborder="0" src="'+url+'" scrolling="no" class="x-iframe"></iframe>',
+                    id: id //实际使用一般是规定好的id，这里以时间戳模拟下
+                })
+            },
+            tabDelete:function(othis){
+                element.tabDelete('mainTab',id);
+                othis.addClass('layui-btn-disabled');
+            },
+            tabChange:function(id){
+                //切换到指定Tab项
+                element.tabChange('mainTab', id); //切换到：用户管理
+            }
+        };
+    });
+</script>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>个人信息网站</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.css"/>
+    <link rel="stylesheet" href="/common/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/common/css/index.css"/>
+
+    <script src="/common/js/jquery-1.11.3.min.js"></script>
+    <script src="/common/js/bootstrap.js"></script>
+    <script src="/layui/layui.all.js"></script>
+    <!-- / table-->
+    <script src="/common/js/bootstrap-table/bootstrap-table-min.js"></script>
+    <link rel="stylesheet" href="/common/css/bootstrap-table/bootstrap-table.css" type="text/css"/>
+    <script src="/common/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+</head>
+<body>
+<button id="btn_search">查询</button>
+<div id="toolbar"></div>
+<table id="menuTable"></table>
+</body>
+
+<script type="text/javascript">
+    $(function () {
+        //1.初始化Table
+        var oTable = new TableInit();
+        oTable.Init();//2.关联查询按钮
+        $("#btn_search").click(function(){
+            $("#menuTable").bootstrapTable("selectPage", 1).bootstrapTable("refresh");
+        });
+
+    });
+    var TableInit = function () {
+        var oTableInit = new Object();
+        //初始化Table
+        oTableInit.Init = function () {
+            var table = $("#menuTable");
+            table.bootstrapTable({
+                url: "/MainInfo/getMenuList",//请求数据url
+                method:'GET',
+                toolbar: '#toolbar',
+                cache: false,
+                striped:true,
+                showHeader: true,
+                showColumns: true, //显示下拉框勾选要显示的列
+                pagination: true,//分页
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParams: oTableInit.queryParams,//传递参数（*）
+                sidePagination: 'server',//服务器端分页
+                pageNumber: 1,
+                pageSize: 5,
+                pageList: [5, 10, 20, 50,'all'],//分页步进值
+                search: true,//显示搜索框
+                minimumCountColunms:4,//最小显示列
+                showRefresh:true,//显示刷新按钮
+                showToggle:true,//是否显示详细视图和列表是视图的按钮
+                cardView:false,//是否显示详细视图
+                datailView:true,//是否显示父子表
+                uniqueID: 'menuId',
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                columns: [  //表格的列
+                    {
+                        align: 'center',
+                        field: 'menuId',//域值
+                        title: '菜单id',//标题
+                        visible: true,//false表示不显示
+                        sortable: false,//启用排序
+                        width: '5%',
+                        formatter:function (value,row,index) {
+                            var pageSize = $("#menuTable").bootstrapTable('getOptions').pageSize;//获取页面的大小
+                            var pageNumber = $("#menuTable").bootstrapTable('getOptions').pageNumber;//获取页面的页码
+                            return pageSize * (pageNumber - 1) + index + 1;//返回序号
+                        }
+                    },
+                    {
+                        align: 'center',
+                        field: 'menuName',//域值
+                        title: '菜单名称',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'parentId',//域值
+                        title: '上一级菜单id',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'orderNum',//域值
+                        title: '菜单排序号',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'url',//域值
+                        title: '菜单路径',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'menuType',//域值
+                        title: '菜单类型',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'visible',//域值
+                        title: '可见性',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'perms',//域值
+                        title: '权限',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'icon',//域值
+                        title: '菜单图标',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '15%',
+                        formatter: function (value,row,index) {
+                            return '<i class="'+value+'"><i>'
+                        }
+                    },
+                    {
+                        align: 'center',
+                        field: 'createBy',//域值
+                        title: '创建人',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'createTime',//域值
+                        title: '创建时间',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                        formatter : function (value,row,index) {
+                            //日期时间戳转换
+                            if (value == null){
+                                return null;
+                            }else{
+                                var time = new Date(value);
+                                var y = time.getFullYear();//年
+                                var m = time.getMonth() + 1;//月
+                                var d = time.getDate();//日
+                                var mm  = time.getHours();//小时
+                                var s = time.getMinutes();//分钟
+                                return y+"-"+m+"-"+d;
+                            }
+                        }
+                    },
+                    {
+                        align: 'center',
+                        field: 'updateBy',//域值
+                        title: '更改人',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '5%',
+                    },
+                    {
+                        align: 'center',
+                        field: 'updateTime',//域值
+                        title: '更改时间',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                        formatter : function (value,row,index) {
+                            //日期时间戳转换
+                            if (value == null){
+                                return null;
+                            }else{
+                                var time = new Date(value);
+                                var y = time.getFullYear();//年
+                                var m = time.getMonth() + 1;//月
+                                var d = time.getDate();//日
+                                var mm  = time.getHours();//小时
+                                var s = time.getMinutes();//分钟
+                                return y+"-"+m+"-"+d;
+                            }
+                        }
+                    },
+                    {
+                        align: 'center',
+                        field: 'remark',//域值
+                        title: '备注',//标题
+                        visible: true,//false表示不显示
+                        sortable: true,//启用排序
+                        width: '10%',
+                    }
+                    ]
+            })};
+        oTableInit.queryParams = function (params) {
+            var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                order: params.order,    //排序方式
+                sortName: params.sort
+            };
+            return temp;
+        };
+        return oTableInit;
+    };
+</script>
+</html>
